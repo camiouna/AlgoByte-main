@@ -24,11 +24,7 @@ const showingAccountDropdown = ref(false);
                             Home
                         </Link>
                     </li>
-                    <li>
-                        <Link :href="route('editor')" :class="{ active: route().current('editor') }">
-                            Editor
-                        </Link>
-                    </li>
+                   
                     <li>
                         <Link :href="route('problem-creation.index')" :class="{ active: route().current('problem-creation.index') }">
                             Problem Creation

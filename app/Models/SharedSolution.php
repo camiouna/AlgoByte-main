@@ -20,4 +20,8 @@ class SharedSolution extends Model {
     public function problem() {
         return $this->belongsTo(Problem::class, 'problemId', 'problemId');
     }
+
+    public function submission() {
+        return $this->belongsTo(Submission::class, 'submissionId', 'submissionId');
+    }
 }

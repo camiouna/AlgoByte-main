@@ -2101,6 +2101,7 @@ namespace App\Models {
      * @property int $solutionId
      * @property-read \App\Models\Member $member
      * @property-read \App\Models\Problem $problem
+     * @property-read \App\Models\Submission $submission
      * @method static \Illuminate\Database\Eloquent\Builder<SharedSolution>|SharedSolution whereSolutionid($value)
      * @method static \Illuminate\Database\Eloquent\Builder<SharedSolution>|SharedSolution whereUserid($value)
      * @method static \Illuminate\Database\Eloquent\Builder<SharedSolution>|SharedSolution whereProblemid($value)

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\HistoryProblemResource;
@@ -19,29 +19,28 @@ class HistoryController extends Controller
     {
         $member = Member::findOrFail($userId);
 
-        // Use the relationship defined in Member.php
         $problems = $member->problems()
+            ->with('creator')
             ->latest()
             ->paginate(15);
 
-        return response()->json($problems);
+        return HistoryProblemResource::paginatedProblemResponse($problems);
     }
 
     /**
      * Get problems successfully solved by the user.
      */
-public function solvedProblems(Request $request, $userId)
-{
-    $member = Member::findOrFail($userId);
+    public function solvedProblems(Request $request, $userId): JsonResponse
+    {
+        $member = Member::findOrFail($userId);
 
-    $problems = $member->solvedProblems()
-        ->with('creator')
-        ->latest()
-        ->paginate(15);
+        $problems = $member->solvedProblems()
+            ->with('creator')
+            ->latest()
+            ->paginate(15);
 
-    // This wraps the paginated collection in our new Resource
-    return HistoryProblemResource::collection($problems);
-}
+        return HistoryProblemResource::paginatedProblemResponse($problems);
+    }
 
     /**
      * Get problems the user attempted but hasn't solved yet.
@@ -55,17 +54,17 @@ public function solvedProblems(Request $request, $userId)
             ->latest()
             ->paginate(15);
 
-        return response()->json($problems);
+        return HistoryProblemResource::paginatedProblemResponse($problems);
     }
 
     public function renderHistoryPage()
-{
-    // Ensure the user is logged in
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    // Return the blade view and pass the userId as a prop
-    return Inertia::render('Profile/History', [
-        'userId' => $userId,
-    ]);
-}
+        return Inertia::render('Profile/History', [
+            'userId' => $userId,
+        ]);
+    }
+
+    
 }

@@ -42,6 +42,13 @@ const validationError = ref('');
 const validationStatus = ref('');
 const validationSummary = ref(null);
 const validationResults = ref([]);
+const lastValidatedSignature = ref('');
+const saveSubmissionMessage = ref('');
+const saveSubmissionError = ref('');
+const isShareDialogOpen = ref(false);
+const shareSolutionTitle = ref('');
+const shareSolutionTitleError = ref('');
+const isSharingSolution = ref(false);
 let modeObserver;
 
 const normalizeText = (value) => String(value ?? '').replace(/\r\n/g, '\n').trim();
@@ -82,8 +89,10 @@ const normalizeSharedSolution = (solution, index) => ({
 });
 
 const savedCases = computed(() => (props.problem.testCases ?? []).map(normalizeCase));
-const submissions = computed(() => (props.problem.submissions ?? []).map(normalizeSubmission));
-const sharedSolutions = computed(() => (props.problem.sharedSolutions ?? []).map(normalizeSharedSolution));
+const submissionItems = ref((props.problem.submissions ?? []).map(normalizeSubmission));
+const submissions = computed(() => submissionItems.value);
+const sharedSolutionItems = ref((props.problem.sharedSolutions ?? []).map(normalizeSharedSolution));
+const sharedSolutions = computed(() => sharedSolutionItems.value);
 
 const ownSubmissions = computed(() => {
     if (!currentUsername.value) {
@@ -130,6 +139,23 @@ const editorOptions = computed(() => ({
 }));
 
 const allCases = computed(() => [...savedCases.value, ...customCases.value]);
+const validationSignature = computed(() =>
+    JSON.stringify({
+        language: selectedLanguage.value,
+        code: code.value,
+        customCases: customCases.value.map((testCase) => ({
+            label: testCase.label,
+            input: testCase.input,
+        })),
+    }),
+);
+const hasCurrentValidation = computed(
+    () => lastValidatedSignature.value !== '' && lastValidatedSignature.value === validationSignature.value,
+);
+const canSaveSubmission = computed(() => hasCurrentValidation.value && !isValidating.value);
+const canShareSolution = computed(
+    () => hasCurrentValidation.value && validationStatus.value === 'Accepted' && !isValidating.value,
+);
 
 const starterCode = (language) => {
     switch (language) {
@@ -326,6 +352,126 @@ const runCode = async (language, sourceCode, input) => {
 const executeOutput = (result) =>
     normalizeText(result.stdout ?? result.stderr ?? result.compile_output ?? 'No output returned.');
 
+const saveSubmission = async () => {
+    if (!canSaveSubmission.value) {
+        return;
+    }
+
+    saveSubmissionMessage.value = '';
+    saveSubmissionError.value = '';
+
+    try {
+        const response = await axios.post(
+            route('submissions.store', { problem: props.problem.problemId }),
+            {
+                code: code.value,
+                language: selectedLanguage.value,
+                status: validationStatus.value,
+                stdout: validationResults.value.map((result) => result.actualOutput).join('\n\n---\n\n'),
+                stderr: validationError.value,
+                compileOutput: validationMessage.value,
+                compile_output: validationMessage.value,
+                exit_code: validationStatus.value === 'Accepted' ? 0 : 1,
+            },
+            {
+                headers: {
+                    Accept: 'application/json',
+                },
+            },
+        );
+
+        const savedSubmission = normalizeSubmission(response.data?.data ?? {}, 0);
+        submissionItems.value = [savedSubmission, ...submissionItems.value];
+        saveSubmissionMessage.value = response.data?.message ?? 'Submission saved successfully.';
+        activeTab.value = 'submissions';
+    } catch (error) {
+        saveSubmissionError.value =
+            error.response?.data?.message ??
+            Object.values(error.response?.data?.errors ?? {}).flat().join(' ') ??
+            error.message ??
+            'Failed to save submission.';
+        console.error('Failed to save submission:', error.response?.data ?? error.message ?? error);
+    }
+};
+
+const openShareSolutionDialog = () => {
+    if (!canShareSolution.value) {
+        return;
+    }
+
+    shareSolutionTitle.value = '';
+    shareSolutionTitleError.value = '';
+    saveSubmissionMessage.value = '';
+    saveSubmissionError.value = '';
+    isShareDialogOpen.value = true;
+};
+
+const closeShareSolutionDialog = (force = false) => {
+    if (isSharingSolution.value && !force) {
+        return;
+    }
+
+    isShareDialogOpen.value = false;
+    shareSolutionTitle.value = '';
+    shareSolutionTitleError.value = '';
+};
+
+const shareSolution = async () => {
+    if (!canShareSolution.value || isSharingSolution.value) {
+        return;
+    }
+
+    const normalizedTitle = shareSolutionTitle.value.trim();
+
+    if (!normalizedTitle) {
+        shareSolutionTitleError.value = 'Enter a title for the shared solution.';
+        return;
+    }
+
+    saveSubmissionMessage.value = '';
+    saveSubmissionError.value = '';
+    shareSolutionTitleError.value = '';
+    isSharingSolution.value = true;
+
+    try {
+        const response = await axios.post(
+            route('solutions.store', { problem: props.problem.problemId }),
+            {
+                title: normalizedTitle,
+                code: code.value,
+                language: selectedLanguage.value,
+                status: validationStatus.value,
+                stdout: validationResults.value.map((result) => result.actualOutput).join('\n\n---\n\n'),
+                stderr: validationError.value,
+                compileOutput: validationMessage.value,
+                compile_output: validationMessage.value,
+                exit_code: validationStatus.value === 'Accepted' ? 0 : 1,
+            },
+            {
+                headers: {
+                    Accept: 'application/json',
+                },
+            },
+        );
+
+        const savedSolution = normalizeSharedSolution(response.data?.data ?? {}, 0);
+        sharedSolutionItems.value = [savedSolution, ...sharedSolutionItems.value];
+        saveSubmissionMessage.value = response.data?.message ?? 'Solution shared successfully.';
+        activeTab.value = 'solutions';
+        closeShareSolutionDialog(true);
+    } catch (error) {
+        saveSubmissionError.value =
+            error.response?.data?.message ??
+            Object.values(error.response?.data?.errors ?? {}).flat().join(' ') ??
+            error.message ??
+            'Failed to share solution.';
+        shareSolutionTitleError.value = error.response?.data?.errors?.title?.[0] ?? '';
+        console.error('Failed to share solution:', error.response?.data ?? error.message ?? error);
+    } finally {
+        isSharingSolution.value = false;
+    }
+};
+
 const validateSolution = async () => {
     if (!code.value.trim()) {
         validationError.value = 'Write a solution before validating.';
@@ -333,6 +479,7 @@ const validateSolution = async () => {
         validationStatus.value = '';
         validationSummary.value = null;
         validationResults.value = [];
+        lastValidatedSignature.value = '';
         return;
     }
 
@@ -342,6 +489,7 @@ const validateSolution = async () => {
         validationStatus.value = '';
         validationSummary.value = null;
         validationResults.value = [];
+        lastValidatedSignature.value = '';
         return;
     }
 
@@ -350,6 +498,9 @@ const validateSolution = async () => {
     validationStatus.value = '';
     validationSummary.value = null;
     validationResults.value = [];
+    lastValidatedSignature.value = '';
+    saveSubmissionMessage.value = '';
+    saveSubmissionError.value = '';
     isValidating.value = true;
 
     const results = [];
@@ -453,13 +604,11 @@ const validateSolution = async () => {
         validationResults.value = results;
         validationSummary.value = { passed, total: results.length };
         validationStatus.value = status;
-        validationMessage.value = status === 'Accepted'? 'All testcases passed.': 'Validation completed with issues.';
-        if (status=='Accepted') {
-            
-        }
-
+        validationMessage.value = status === 'Accepted' ? 'All testcases passed.' : 'Validation completed with issues.';
+        lastValidatedSignature.value = validationSignature.value;
     } catch (error) {
         validationError.value = error.response?.data?.message ?? error.message ?? 'Unable to validate right now.';
+        lastValidatedSignature.value = '';
     } finally {
         isValidating.value = false;
     }
@@ -622,6 +771,12 @@ const statusClass = (status) => {
                             <p class="copy small">
                                 Saved cases use stored expected outputs. Custom cases use the accepted reference submission first.
                             </p>
+                            <p v-if="saveSubmissionMessage" class="copy small success-copy">
+                                {{ saveSubmissionMessage }}
+                            </p>
+                            <p v-if="saveSubmissionError" class="error-copy">
+                                {{ saveSubmissionError }}
+                            </p>
                         </div>
 
                         <div class="toolbar-actions">
@@ -641,6 +796,12 @@ const statusClass = (status) => {
                             </select>
                             <button type="button" class="tool-button secondary" @click="resetEditor">
                                 Reset
+                            </button>
+                            <button type="button" class="tool-button secondary" :disabled="!canSaveSubmission" @click="saveSubmission">
+                                Save Submission
+                            </button>
+                            <button type="button" class="tool-button secondary" :disabled="!canShareSolution || isSharingSolution" @click="openShareSolutionDialog">
+                                Share Solution
                             </button>
                             <button type="button" class="tool-button primary" :disabled="isValidating" @click="validateSolution">
                                 {{ isValidating ? 'Validating...' : 'Validate' }}
@@ -796,6 +957,43 @@ const statusClass = (status) => {
                 </section>
             </div>
         </section>
+
+        <div v-if="isShareDialogOpen" class="dialog-backdrop" @click.self="closeShareSolutionDialog">
+            <form class="dialog-card" @submit.prevent="shareSolution">
+                <div class="dialog-head">
+                    <span class="eyebrow">Share Solution</span>
+                    <h2>Name this solution</h2>
+                </div>
+
+                <p class="copy">
+                    Add a short title before publishing this accepted solution to the shared solutions tab.
+                </p>
+
+                <label class="dialog-field">
+                    <span class="eyebrow">Solution Title</span>
+                    <input
+                        v-model="shareSolutionTitle"
+                        type="text"
+                        class="dialog-input"
+                        maxlength="255"
+                        placeholder="Example: Sliding window walkthrough"
+                        @input="shareSolutionTitleError = ''"
+                        autofocus
+                    />
+                </label>
+
+                <p v-if="shareSolutionTitleError" class="error-copy">{{ shareSolutionTitleError }}</p>
+
+                <div class="dialog-actions">
+                    <button type="button" class="tool-button secondary" :disabled="isSharingSolution" @click="closeShareSolutionDialog">
+                        Cancel
+                    </button>
+                    <button type="submit" class="tool-button primary" :disabled="isSharingSolution">
+                        {{ isSharingSolution ? 'Sharing...' : 'OK' }}
+                    </button>
+                </div>
+            </form>
+        </div>
     </AuthenticatedLayout>
 </template>
 
@@ -1105,6 +1303,66 @@ const statusClass = (status) => {
     cursor: not-allowed;
 }
 
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(3, 10, 16, 0.78);
+    backdrop-filter: blur(8px);
+}
+
+.dialog-card {
+    width: min(520px, 100%);
+    padding: 22px;
+    border: 1px solid var(--ab-border-strong);
+    border-radius: 16px;
+    background:
+        linear-gradient(180deg, rgba(10, 24, 36, 0.98), rgba(7, 17, 27, 0.98));
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+.dialog-head {
+    display: grid;
+    gap: 6px;
+}
+
+.dialog-head h2 {
+    margin: 0;
+    color: var(--ab-text);
+}
+
+.dialog-field {
+    display: grid;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.dialog-input {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--ab-border);
+    border-radius: 8px;
+    background: rgba(4, 9, 14, 0.88);
+    color: var(--ab-text);
+    font-size: 14px;
+}
+
+.dialog-input:focus {
+    border-color: var(--ab-cyan);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 217, 255, 0.16);
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
 .editor-wrapper {
     height: 100%;
     min-height: 460px;
@@ -1192,6 +1450,11 @@ code {
     font-weight: 700;
 }
 
+.success-copy {
+    color: #89ffe0;
+}
+
+
 .remove-button {
     min-height: 34px;
     padding: 0 12px;
@@ -1241,6 +1504,10 @@ code {
     .case-grid,
     .custom-row {
         grid-template-columns: 1fr;
+    }
+
+    .dialog-actions {
+        display: grid;
     }
 
     .tab-bar {

@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Problem;
 use Inertia\Inertia;
-use App\Models\Member;
-use App\Models\Submission;
 class ProblemBrowsingController extends Controller
 {
 
@@ -59,7 +57,7 @@ class ProblemBrowsingController extends Controller
         $problem->load('creator:userId,username');
         $testCases = $problem->testCases()->get(['input', 'expected_output']);
         $submissions = $problem->submissions()->with('member:userId,username')->where('userId', auth()->id())->latest()->get();
-        $sharedSolutions = $problem->sharedSolutions()->latest()->get();
+        $sharedSolutions = $problem->sharedSolutions()->with(['member:userId,username', 'submission:submissionId,language'])->latest()->get();
         return Inertia::render('ProblemDetail', [
             'problem' => [
                 'problemId' => $problem->problemId,
@@ -73,21 +71,28 @@ class ProblemBrowsingController extends Controller
                 'testCases' => $testCases,
                 'submissions' => $submissions->map(function ($submission) {
                     return [
-                        'username' => $submission->user?->username,
+                        'submissionId' => $submission->submissionId,
+                        'username' => $submission->member?->username,
                         'language' => $submission->language,
                         'code' => $submission->code,
                         'status' => $submission->status,
+                        'stdout' => $submission->stdout,
+                        'stderr' => $submission->stderr,
+                        'compileOutput' => $submission->compile_output,
                         'createdAt' => $submission->created_at->diffForHumans(null, false, false, 2),
                     ];
                 }),
-                'sharedSolutions'=>$sharedSolutions->map(function ($solution) {
+                'sharedSolutions' => $sharedSolutions->map(function ($solution) {
                     return [
-                        'username' =>Member::find($solution->userId)?->username ?? 'Unknown user',
-                        'language' => Submission::find($solution->submissionId)?->language ?? 'Unknown language',
+                        'solutionId' => $solution->solutionId,
+                        'title' => $solution->title,
+                        'username' => $solution->member?->username ?? 'Unknown user',
+                        'language' => $solution->submission?->language ?? 'Unknown language',
                         'code' => $solution->code,
+                        'explanation' => $solution->explanation,
                         'createdAt' => $solution->created_at->diffForHumans(null, false, false, 2),
                     ];
-                })
+                }),
             ],
         ]);
     }

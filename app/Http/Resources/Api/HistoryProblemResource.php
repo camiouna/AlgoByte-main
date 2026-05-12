@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Resources\API;
+namespace App\Http\Resources\Api;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,13 +14,36 @@ class HistoryProblemResource extends JsonResource
         return [
             'id' => $this->problemId,
             'title' => $this->title,
-            'difficulty' => ucfirst($this->difficulty),
+            'difficulty' => ucfirst((string) $this->difficulty),
             'status' => $this->status,
-            'created_at' => $this->created_at->format('Y-m-d'),
+            'created_at' => optional($this->created_at)->format('Y-m-d'),
             'creator' => [
-                'username' => $this->creator->username ?? 'Unknown',
+                'username' => $this->creator?->username ?? 'Unknown',
             ],
-            // We can add logic later to show the user's specific best score or language used
         ];
+    }
+
+    public static function paginatedProblemResponse(LengthAwarePaginator $problems): JsonResponse
+    {
+        $problems->getCollection()->loadMissing('creator');
+
+        return response()->json([
+            'data' => static::collection($problems->getCollection())->resolve(),
+            'meta' => [
+                'current_page' => $problems->currentPage(),
+                'from' => $problems->firstItem(),
+                'last_page' => $problems->lastPage(),
+                'path' => $problems->path(),
+                'per_page' => $problems->perPage(),
+                'to' => $problems->lastItem(),
+                'total' => $problems->total(),
+            ],
+            'links' => [
+                'first' => $problems->url(1),
+                'last' => $problems->url($problems->lastPage()),
+                'prev' => $problems->previousPageUrl(),
+                'next' => $problems->nextPageUrl(),
+            ],
+        ]);
     }
 }

@@ -10,19 +10,18 @@ import { Head, Link } from '@inertiajs/vue3';
         <section class="home-hero">
             <div class="home-grid">
                 <div class="hero-copy">
-                    <p class="eyebrow">Demo edition</p>
                     <h1>Practice algorithms inside a sharper AlgoByte workspace.</h1>
                     <p>
                         Write solutions, shape test cases, and send code to the execution
                         engine from one dark, focused interface inspired by the Figma design.
                     </p>
                     <div class="hero-actions">
-                        <Link :href="route('editor')" class="primary-action">
-                            Open editor
+                        <Link :href="route('browse-problems.index')" class="primary-action">
+                            Start Coding
                         </Link>
-                        <a href="#footer" class="secondary-action">
-                            About AlgoByte
-                        </a>
+                        <Link :href="route('problem-creation.index')" class="secondary-action">
+                            Create A Problem !
+                        </Link>
                     </div>
                 </div>
 

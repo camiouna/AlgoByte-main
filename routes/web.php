@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use App\Services\Piston\PistonExecutionService;
 use App\Http\Controllers\ProblemCreationController;
 use App\Http\Controllers\ProblemBrowsingController;
+use App\Http\Controllers\CodeSubmissionController;
+use App\Http\Controllers\CodeSolutionController;
 Route::get('/', function () {
     return Inertia::render('Home');
 })->middleware(['auth', 'verified'])->name('home');
@@ -31,7 +33,8 @@ Route::get('/browse-problems', [ProblemBrowsingController::class, 'index'])->mid
 
 Route::get('/browse-problems/{problem}', [ProblemBrowsingController::class, 'show'])->middleware(['auth', 'verified'])->name('browse-problems.show');
 
-
+Route::post('/browse-problems/{problem}/submission', [CodeSubmissionController::class, 'store'])->middleware(['auth', 'verified'])->name('submissions.store');
+Route::post('/browse-problems/{problem}/solution', [CodeSolutionController::class, 'store'])->middleware(['auth', 'verified'])->name('solutions.store');
 Route::post('/execute', function (Request $request, PistonExecutionService $piston) {
     $validated = $request->validate([
         'language' => ['required', 'string', 'in:javascript,typescript,python,java,c'],

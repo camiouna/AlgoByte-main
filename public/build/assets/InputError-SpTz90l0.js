@@ -1,1 +1,0 @@
-import{F as e,V as t,d as n,g as r,k as i,y as a}from"./app-Bm-QFTIj.js";var o={class:`text-sm text-[#ff8aa0]`},s={__name:`InputError`,props:{message:{type:String}},setup(s){return(c,l)=>e((i(),a(`div`,null,[r(`p`,o,t(s.message),1)],512)),[[n,s.message]])}};export{s as t};

@@ -800,11 +800,15 @@ const createProblem = async () => {
                                     <div class="testcase-actions">
                                         <button
                                             type="button"
-                                            class="secondary-action"
+                                            :class="[
+                                                'secondary-action',
+                                                'testcase-validate-button',
+                                                `validate-${testCase.status}`,
+                                            ]"
                                             :disabled="testCase.isValidating"
                                             @click="validateTestCase(testCase)"
                                         >
-                                            {{ testCase.isValidating ? 'Validating...' : 'Validate' }}
+                                            {{ testCase.isValidating ? 'Validating ...' : 'Validate' }}
                                         </button>
                                         <p class="testcase-hint">
                                             {{ formatArgumentPreview(testCase) }}
@@ -1343,6 +1347,52 @@ const createProblem = async () => {
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+}
+
+.secondary-action.testcase-validate-button {
+    min-width: 80px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-color: rgba(3, 17, 20, 0.42);
+    background:
+        linear-gradient(135deg, rgba(56, 217, 255, 0.18), rgba(24, 242, 195, 0.12)),
+        var(--site-editor-top);
+    box-shadow: 0 12px 24px rgba(4, 20, 29, 0.16);
+    letter-spacing: 0.02em;
+}
+
+.secondary-action.testcase-validate-button:hover {
+    border-color: rgba(56, 217, 255, 0.72);
+    background:
+        linear-gradient(135deg, rgba(56, 217, 255, 0.26), rgba(24, 242, 195, 0.16)),
+        var(--site-editor-top);
+    box-shadow: 0 16px 30px rgba(4, 20, 29, 0.22);
+}
+
+.secondary-action.testcase-validate-button.validate-success {
+    border-color: rgba(24, 242, 195, 0.4);
+    background:
+        linear-gradient(135deg, rgba(24, 242, 195, 0.18), rgba(56, 217, 255, 0.12)),
+        var(--site-editor-top);
+}
+
+.secondary-action.testcase-validate-button.validate-error {
+    border-color: rgba(255, 93, 122, 0.42);
+    background:
+        linear-gradient(135deg, rgba(255, 93, 122, 0.16), rgba(255, 170, 118, 0.12)),
+        var(--site-editor-top);
+}
+
+.secondary-action.testcase-validate-button.validate-running {
+    border-color: rgba(56, 217, 255, 0.76);
+    background:
+        linear-gradient(135deg, rgba(56, 217, 255, 0.28), rgba(24, 242, 195, 0.18)),
+        var(--site-editor-top);
+    box-shadow: 0 0 0 1px rgba(56, 217, 255, 0.28), 0 18px 34px rgba(21, 113, 145, 0.2);
+}
+
+.secondary-action.testcase-validate-button:disabled {
+    opacity: 0.88;
 }
 
 .secondary-action {
