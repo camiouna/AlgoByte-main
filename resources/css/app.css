@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    color-scheme: dark;
+    --site-bg: #05080d;
+    --site-text: #e8f7ff;
+    --site-muted: #89a9b8;
+    --site-panel: rgba(5, 10, 16, 0.96);
+    --site-panel-strong: rgba(13, 27, 40, 0.96);
+    --site-card: rgba(8, 18, 29, 0.8);
+    --site-input: rgba(4, 9, 14, 0.92);
+    --site-input-focus: rgba(7, 17, 27, 0.98);
+    --site-editor-top: rgba(11, 22, 34, 0.95);
+    --site-border: rgba(101, 232, 255, 0.18);
+    --site-border-strong: rgba(101, 232, 255, 0.34);
+    --site-border-soft: rgba(56, 217, 255, 0.12);
+    --site-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+    --site-placeholder: #6f8a97;
+    --site-warning: #ffcf8a;
+    --grid-opacity: 0.035;
+    --ab-bg: #05080d;
+    --ab-bg-soft: #07111b;
+    --ab-panel: #0b1622;
+    --ab-panel-strong: #0f1f2c;
+    --ab-border: rgba(101, 232, 255, 0.18);
+    --ab-border-strong: rgba(101, 232, 255, 0.34);
+    --ab-text: #e8f7ff;
+    --ab-muted: #89a9b8;
+    --ab-cyan: #38d9ff;
+    --ab-teal: #18f2c3;
+    --ab-lime: #adff2f;
+    --ab-danger: #ff5d7a;
+    --ab-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+    --auth-page-bg:
+        linear-gradient(rgba(36, 93, 117, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 93, 117, 0.05) 1px, transparent 1px),
+        linear-gradient(135deg, #edf2f5 0%, #dde6eb 45%, #e5edf1 100%);
+    --auth-page-bg-size: 30px 30px, 30px 30px, auto;
+}
+
+:root[data-auth-bg='light'] {
+    --auth-page-bg:
+        linear-gradient(rgba(36, 93, 117, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(36, 93, 117, 0.05) 1px, transparent 1px),
+        linear-gradient(135deg, #edf2f5 0%, #dde6eb 45%, #e5edf1 100%);
+    --auth-page-bg-size: 30px 30px, 30px 30px, auto;
+}
+
+:root[data-auth-bg='dark'] {
+    --auth-page-bg:
+        linear-gradient(rgba(56, 217, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 217, 255, 0.035) 1px, transparent 1px),
+        radial-gradient(circle at left, #0a1a2f, #02060d);
+    --auth-page-bg-size: 28px 28px, 28px 28px, auto;
+}
+
+:root[data-auth-bg='blue'] {
+    --auth-page-bg:
+        radial-gradient(circle at 18% 18%, rgba(0, 234, 255, 0.28), transparent 30%),
+        radial-gradient(circle at 86% 12%, rgba(123, 227, 239, 0.3), transparent 28%),
+        linear-gradient(135deg, #e7fbff 0%, #bfefff 48%, #f7fdff 100%);
+    --auth-page-bg-size: auto, auto, auto;
+}
+
+html {
+    background: var(--site-bg);
+}
+
+body {
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(56, 217, 255, var(--grid-opacity)) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 217, 255, var(--grid-opacity)) 1px, transparent 1px),
+        radial-gradient(circle at 18% 12%, rgba(24, 242, 195, 0.12), transparent 28%),
+        radial-gradient(circle at 78% 2%, rgba(56, 217, 255, 0.1), transparent 24%),
+        var(--site-bg);
+    background-size: 28px 28px, 28px 28px, auto, auto, auto;
+    color: var(--site-text);
+}
+
+::selection {
+    background: rgba(24, 242, 195, 0.35);
+    color: #ffffff;
+}
+
+.bg-white,
+.bg-gray-50,
+.bg-gray-100 {
+    background-color: var(--ab-panel) !important;
+}
+
+.text-gray-900,
+.text-gray-800,
+.text-gray-700,
+.text-gray-600,
+.text-gray-500,
+.text-black,
+.text-black\/50 {
+    color: var(--ab-text) !important;
+}
+
+.border-gray-300,
+.ring-gray-300 {
+    border-color: var(--ab-border) !important;
+}
+
+.shadow,
+.shadow-sm,
+.shadow-xl {
+    box-shadow: var(--ab-shadow) !important;
+}
+
+.sm\:rounded-lg,
+.rounded-lg,
+.rounded-md {
+    border-radius: 8px !important;
+}
+
+a.text-gray-600,
+a.text-gray-700,
+.underline {
+    color: var(--ab-cyan) !important;
+}
+
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-100:hover {
+    background-color: rgba(56, 217, 255, 0.1) !important;
+}

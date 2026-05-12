@@ -1,0 +1,7 @@
+<template>
+    <button
+        class="inline-flex items-center rounded-lg border border-transparent bg-gradient-to-r from-[#38d9ff] to-[#18f2c3] px-5 py-2.5 text-xs font-bold uppercase text-[#031016] shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#38d9ff] focus:ring-offset-2 focus:ring-offset-[#09141f] active:scale-[0.99]"
+    >
+        <slot />
+    </button>
+</template>
