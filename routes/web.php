@@ -16,6 +16,8 @@ use App\Http\Controllers\ProblemCreationController;
 use App\Http\Controllers\ProblemBrowsingController;
 use App\Http\Controllers\CodeSubmissionController;
 use App\Http\Controllers\CodeSolutionController;
+use App\Models\Comment;
+use App\Models\LikeActivity;
 Route::get('/', function () {
     return Inertia::render('Home');
 })->middleware(['auth', 'verified'])->name('home');
@@ -32,6 +34,10 @@ Route::post('/problemcreation', [ProblemCreationController::class, 'store'])->mi
 
 Route::post('/discussions/{discussion}/upvote', [DiscussionController::class, 'upvote'])->middleware(['auth', 'verified'])->name('discussions.upvote');
 Route::post('/discussions/{discussion}/downvote', [DiscussionController::class, 'downvote'])->middleware(['auth', 'verified'])->name('discussions.downvote');
+
+Route::post('/comments/{comment}/upvote', [DiscussionController::class, 'upvoteComment'])->middleware(['auth', 'verified'])->name('comments.upvote');
+Route::post('/comments/{comment}/downvote', [DiscussionController::class, 'downvoteComment'])->middleware(['auth', 'verified'])->name('comments.downvote');
+
 Route::get('/browse-problems', [ProblemBrowsingController::class, 'index'])->middleware(['auth', 'verified'])->name('browse-problems.index');
 
 Route::get('/browse-problems/{problem}', [ProblemBrowsingController::class, 'show'])->middleware(['auth', 'verified'])->name('browse-problems.show');

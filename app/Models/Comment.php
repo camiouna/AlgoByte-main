@@ -22,6 +22,10 @@ class Comment extends Model
         return $this->belongsTo(Discussion::class, 'discussionId', 'discussionId');
     }
 
+    public function likes() {
+        return $this->hasMany(LikeActivity::class, 'commentId', 'commentId');
+    }
+
     public function sharedSolution() {
         return $this->belongsTo(SharedSolution::class, 'sharedSolutionId', 'solutionId');
     }

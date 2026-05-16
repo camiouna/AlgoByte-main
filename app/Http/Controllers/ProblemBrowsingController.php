@@ -105,6 +105,8 @@ class ProblemBrowsingController extends Controller
                         'createdAt' => $discussion->created_at->diffForHumans(null, false, false, 2),
                         'comments' => $discussion->comments()->with('member:userId,username')->latest()->get()->map(function ($comment) {
                             return [
+                                'likes' => $comment->likes()->count(),
+                                'isLikedByCurrentUser' => $comment->likes()->where('userId', auth()->id())->exists()    ,
                                 'commentId' => $comment->commentId,
                                 'username' => $comment->member?->username ?? 'Unknown user',
                                 'content' => $comment->content,

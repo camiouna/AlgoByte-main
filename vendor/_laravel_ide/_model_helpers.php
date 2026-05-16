@@ -15,6 +15,8 @@ namespace App\Models {
      * @property int $commentId
      * @property-read \App\Models\Member $member
      * @property-read \App\Models\Discussion $discussion
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LikeActivity> $likes
+     * @property-read int|null $likes_count
      * @property-read \App\Models\SharedSolution $sharedSolution
      * @method static \Illuminate\Database\Eloquent\Builder<Comment>|Comment whereCommentid($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Comment>|Comment whereUserid($value)
@@ -701,6 +703,7 @@ namespace App\Models {
      * @property int $likeId
      * @property-read \App\Models\Member $member
      * @property-read \App\Models\Discussion $discussion
+     * @property-read \App\Models\Comment $comment
      * @property-read \App\Models\SharedSolution $sharedSolution
      * @method static \Illuminate\Database\Eloquent\Builder<LikeActivity>|LikeActivity whereLikeid($value)
      * @method static \Illuminate\Database\Eloquent\Builder<LikeActivity>|LikeActivity whereUserid($value)

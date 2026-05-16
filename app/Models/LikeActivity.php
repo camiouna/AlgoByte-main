@@ -22,7 +22,9 @@ class LikeActivity extends Model
         return $this->belongsTo(Discussion::class, 'discussionId', 'discussionId');
     }
 
-
+        public function comment(): BelongsTo {
+            return $this->belongsTo(Comment::class, 'commentId', 'commentId');
+        }
 
     public function sharedSolution(): BelongsTo {
         return $this->belongsTo(SharedSolution::class, 'sharedSolutionId', 'solutionId');
