@@ -55,6 +55,7 @@ class ProblemBrowsingController extends Controller
     public function show(Problem $problem)
     {
         $problem->load('creator:userId,username');
+        $discussion= $problem->discussion()->with('member:userId,username')->latest()->get();
         $testCases = $problem->testCases()->get(['input', 'expected_output']);
         $submissions = $problem->submissions()->with('member:userId,username')->where('userId', auth()->id())->latest()->get();
         $sharedSolutions = $problem->sharedSolutions()->with(['member:userId,username', 'submission:submissionId,language'])->latest()->get();
@@ -91,6 +92,25 @@ class ProblemBrowsingController extends Controller
                         'code' => $solution->code,
                         'explanation' => $solution->explanation,
                         'createdAt' => $solution->created_at->diffForHumans(null, false, false, 2),
+                    ];
+                }),
+                'discussions' => $discussion->map(function ($discussion) {
+                    return [
+                        'discussionId' => $discussion->discussionId,
+                        'username' => $discussion->member?->username ?? 'Unknown user',
+                        'title' => $discussion->title ?? 'Discussion',
+                        'content' => $discussion->content,
+                        'likes' => $discussion->likes()->count(),
+                        'isLikedByCurrentUser' => $discussion->likes()->where('userId', auth()->id())->exists(),
+                        'createdAt' => $discussion->created_at->diffForHumans(null, false, false, 2),
+                        'comments' => $discussion->comments()->with('member:userId,username')->latest()->get()->map(function ($comment) {
+                            return [
+                                'commentId' => $comment->commentId,
+                                'username' => $comment->member?->username ?? 'Unknown user',
+                                'content' => $comment->content,
+                                'createdAt' => $comment->created_at->diffForHumans(null, false, false, 2),
+                            ];
+                        })
                     ];
                 }),
             ],

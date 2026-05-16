@@ -356,6 +356,10 @@ namespace App\Models {
      * @property int $userId
      * @property int $discussionId
      * @property-read \App\Models\Member $member
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Comment> $comments
+     * @property-read int|null $comments_count
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LikeActivity> $likes
+     * @property-read int|null $likes_count
      * @property-read \App\Models\Problem $problem
      * @method static \Illuminate\Database\Eloquent\Builder<Discussion>|Discussion whereDiscussionid($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Discussion>|Discussion whereUserid($value)
@@ -1406,6 +1410,8 @@ namespace App\Models {
      * @property int $creatorId
      * @property int $problemId
      * @property-read \App\Models\Member $creator
+     * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Discussion> $discussion
+     * @property-read int|null $discussion_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TestCase> $testCases
      * @property-read int|null $test_cases_count
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Submission> $submissions

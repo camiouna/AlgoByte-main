@@ -16,6 +16,9 @@ class Problem extends Model {
         return $this->belongsTo(Member::class, 'creatorId', 'userId');
     }
 
+    public function discussion() {
+        return $this->hasMany(Discussion::class, 'problemId', 'problemId');
+    }
     public function testCases() {
         return $this->hasMany(TestCase::class, 'problemId', 'problemId');
     }

@@ -4,6 +4,7 @@ use App\Models\Problem;
 use App\Models\TestCase;
 use App\Http\Controllers\Api\HistoryController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DiscussionController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,8 @@ Route::get('/problemcreation', function () {
 
 Route::post('/problemcreation', [ProblemCreationController::class, 'store'])->middleware(['auth', 'verified'])->name('problem-creation.store');
 
+Route::post('/discussions/{discussion}/upvote', [DiscussionController::class, 'upvote'])->middleware(['auth', 'verified'])->name('discussions.upvote');
+Route::post('/discussions/{discussion}/downvote', [DiscussionController::class, 'downvote'])->middleware(['auth', 'verified'])->name('discussions.downvote');
 Route::get('/browse-problems', [ProblemBrowsingController::class, 'index'])->middleware(['auth', 'verified'])->name('browse-problems.index');
 
 Route::get('/browse-problems/{problem}', [ProblemBrowsingController::class, 'show'])->middleware(['auth', 'verified'])->name('browse-problems.show');

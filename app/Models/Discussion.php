@@ -16,7 +16,12 @@ class Discussion extends Model
     public function member() {
         return $this->belongsTo(Member::class, 'userId', 'userId');
     }
-
+    public function comments() {
+        return $this->hasMany(Comment::class, 'discussionId', 'discussionId');
+    }
+    public function likes() {
+        return $this->hasMany(LikeActivity::class, 'discussionId', 'discussionId');
+    }
     public function problem() {
         return $this->belongsTo(Problem::class, 'problemId', 'problemId');
     }
